@@ -1,51 +1,65 @@
-# 🧠 AI-Powered Resilient Search Assistant  
+# Building smarter AI search
 
-🚀 **Adaptive AI Search with LangChain & Smart Fallbacks**  
+A command-line research assistant that keeps working when the AI service doesn't.
 
-This Python-based search assistant integrates **Anthropic Claude (via LangChain)** for AI-powered responses and dynamically falls back to **Google, Wikipedia, Gemini, or Microsoft Copilot** if the API key is missing. Never let an API failure disrupt your workflow again!  
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-0.3-1c3c3c)
+![Licence](https://img.shields.io/badge/licence-MIT-green)
 
-## 📌 Features  
-✅ **AI-Powered Responses** – Uses LangChain & Anthropic Claude  
-✅ **Smart Fallbacks** – Google, Wikipedia, Gemini, Copilot  
-✅ **Interactive CLI** – User-friendly interface for choosing search methods  
-✅ **Robust Logging** – Tracks errors and improves debugging  
-✅ **Fail-Safe Mechanism** – Ensures research never stops  
+## How it works
 
-## 🛠️ Tech Stack  
-- **Python** 🐍  
-- **LangChain** ⚡  
-- **Pydantic** ✅  
-- **Logging** 📊  
-- **Web Automation** 🌐  
+**AI mode** (when `ANTHROPIC_API_KEY` is set)
 
-## 🚀 Installation & Usage  
+- A LangChain tool-calling agent, powered by Anthropic Claude, answers your query.
+- It can call three tools: DuckDuckGo web search, Wikipedia, and a tool that saves the summary to `research_output.txt`.
+- The answer is parsed into a Pydantic model (`topic`, `summary`, `sources`, `tools_used`), so the output is always structured.
+- If a call fails (network, API or parsing error), the app logs the error and offers the fallback menu for that query.
 
-### 🔹 Prerequisites  
-- Python 3.8+  
-- Install dependencies:  
+**Fallback mode** (no key)
+
+1. DuckDuckGo results printed in the terminal
+2. Google search opened in your browser
+3. Wikipedia search opened in your browser
+
+## Setup
 
 ```bash
+git clone https://github.com/Samiurr129/Building-Smarter-AI-Search.git
+cd Building-Smarter-AI-Search
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-Create a .env file and add:
-ANTHROPIC_API_KEY=your_api_key_here
-🔹 Running the Assistant
+cp sample.env .env          # then add your Anthropic API key to .env
 python main.py
-🔹 Usage
-Enter your search query
-If the AI key is missing, choose:
-1 for Google Search 🌍
-2 for Wikipedia 📚
-3 for Gemini 🤖
-4 for Microsoft Copilot 💼
-Results will be displayed in your browser & CLI
-📩 Contact
-📧 Email: samiurr129@gmail.com
-Contributions are welcome! Feel free to fork, star ⭐, and raise issues! 🔥
+```
 
-#AI #Python #LangChain #Automation #MachineLearning #SearchOptimization
+Without a key, `python main.py` starts in fallback mode.
 
----
+By default it uses `claude-sonnet-5-5`. Set `ANTHROPIC_MODEL` in `.env` to use another Claude model.
 
-Let me know if you want any modifications! 🚀
+## Example
 
+```
+What can I help you research? (type 'exit' to quit): hydrogen HGV refuelling in the UK
 
+Topic: Hydrogen HGV refuelling in the UK
+<summary written by the agent>
+
+Sources:
+- <links returned by the search tools>
+```
+
+## Files
+
+| File | Purpose |
+| --- | --- |
+| `main.py` | Mode selection, the LangChain agent, structured output and fallback menu |
+| `tools.py` | Web search, Wikipedia and save-to-file tools |
+| `sample.env` | Template for your `.env` file. Never commit `.env` |
+
+## Tech
+
+Python, LangChain 0.3, Anthropic Claude, Pydantic, DuckDuckGo search (`ddgs`), Wikipedia API, `logging`.
+
+## Author
+
+**Samiur Rahman**, Bradford, UK. [LinkedIn](https://www.linkedin.com/in/samiur-rahman29/) · [GitHub](https://github.com/Samiurr129)

@@ -1,27 +1,37 @@
-from langchain.tools import Tool  # Replace 'langchain.tools' with the correct module if Tool is defined elsewhere
+"""Tools the research agent can call, plus plain functions used by the fallback mode."""
+from datetime import datetime
+from pathlib import Path
 
-def gemini_query(prompt: str) -> str:
-    """
-    Placeholder function for querying Gemini AI.
-    Replace this with actual API integration when available.
-    """
-    # Example: Replace with actual API call
-    response = f"Simulated Gemini response for prompt: {prompt}"
-    return response
+from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
+from langchain_community.utilities import WikipediaAPIWrapper
+from langchain_core.tools import Tool
 
-gemini_tool = Tool(
-    name="gemini_query",
-    func=gemini_query,
-    description="Query Gemini AI for information or assistance.",
+OUTPUT_FILE = Path("research_output.txt")
+
+
+def save_to_txt(data: str, filename: Path = OUTPUT_FILE) -> str:
+    """Append a timestamped research note to a text file."""
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = f"--- Research output ({stamp}) ---\n{data}\n\n"
+    with open(filename, "a", encoding="utf-8") as f:
+        f.write(entry)
+    return f"Saved to {filename}"
+
+
+search_tool = Tool(
+    name="web_search",
+    func=DuckDuckGoSearchRun().run,
+    description="Search the web for current information. Input: a search query.",
 )
-def search_tool(query):
-    """Simulate a search tool."""
-    return f"Search results for: {query}"
 
-def wiki_tool(query):
-    """Simulate a Wikipedia tool."""
-    return f"Wikipedia summary for: {query}"
+wiki_tool = WikipediaQueryRun(
+    api_wrapper=WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=1000)
+)
 
-def save_tool(data):
-    """Simulate a save tool."""
-    return f"Data saved: {data}"
+save_tool = Tool(
+    name="save_text_to_file",
+    func=save_to_txt,
+    description="Save the final research summary to a text file. Input: the text to save.",
+)
+
+TOOLS = [search_tool, wiki_tool, save_tool]
